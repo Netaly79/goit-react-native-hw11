@@ -27,7 +27,21 @@ const LoginScreen = () => {
       Alert.alert("Помилка", "Будь ласка, заповніть усі необхідні поля");
       return;
     }
-    Alert.alert("Credentials", `${email} + ${password}`);
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert(
+        "Помилка",
+        "Будь ласка, введіть коректну адресу електронної пошти"
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Помилка", "Пароль повинен бути не менше 6 символів");
+      return;
+    }
+
+    Alert.alert("Логін інфо", `${email} + ${password}`);
   };
 
   const togglePasswordVisibility = () => {

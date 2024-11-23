@@ -1,63 +1,131 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Image,
   ImageBackground,
   Pressable,
   StyleSheet,
   Text,
+  TouchableWithoutFeedback,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   View,
   TextInput,
 } from "react-native";
 
+import AddPhotoComponent from "../assets/icons/AddPhotoComponent";
 const image = require("../assets/photo_bg.png");
-const photo_block = require("../assets/add_photo.png");
+const photo_block = null;
 
 const RegistrationScreen = () => {
+  const [login, setLogin] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isPassFocused, setIsPassFocused] = useState(false);
+  const [isLoginFocused, setIsLoginFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
   };
+
+  const onRegistration = () => {
+    if (!email || !password || !login) {
+      Alert.alert("Помилка", "Будь ласка, заповніть усі необхідні поля");
+      return;
+    }
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert(
+        "Помилка",
+        "Будь ласка, введіть коректну адресу електронної пошти"
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Помилка", "Пароль повинен бути не менше 6 символів");
+      return;
+    }
+    Alert.alert("Регистрація", `${login} + ${email} + ${password}`);
+  };
   return (
-    <View style={styles.container}>
-      <ImageBackground source={image} resizeMode="cover" style={styles.image}>
-        <View style={styles.canva}>
-          <Text style={styles.title}>Реєстрація</Text>
-          <View style={styles.inputGroup}>
-            <TextInput style={styles.input} placeholder="Логін" />
-            <TextInput
-              style={styles.input}
-              placeholder="Адреса електронної пошти"
-            />
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={styles.password}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Пароль"readOnly
-                placeholderTextColor="#B0B0B0"
-                secureTextEntry={!isPasswordVisible}
-              />
-              <Pressable
-                style={styles.button}
-                onPress={togglePasswordVisibility}>
-                <Text style={styles.buttonText}>
-                  {isPasswordVisible ? "Скрыть" : "Показати"}
-                </Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <ImageBackground source={image} resizeMode="cover" style={styles.image}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.keyboardContainer}
+            keyboardVerticalOffset={Platform.OS === "ios" ? -100 : 0}>
+            <View style={styles.canva}>
+              <View style={styles.avatarBox}>
+                <Image style={styles.avatar} source={photo_block} />
+                <AddPhotoComponent style={styles.addPhoto} />
+              </View>
+              <Text style={styles.title}>Реєстрація</Text>
+              <View style={styles.inputGroup}>
+                <TextInput
+                  style={[styles.input, isLoginFocused && styles.inputFocused]}
+                  placeholder="Логін"
+                  value={login}
+                  onChangeText={setLogin}
+                  placeholderTextColor="#BDBDBD"
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  onFocus={() => setIsLoginFocused(true)}
+                  onBlur={() => setIsLoginFocused(false)}
+                />
+                <TextInput
+                  style={[styles.input, isEmailFocused && styles.inputFocused]}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Адреса електронної пошти"
+                  placeholderTextColor="#BDBDBD"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  onFocus={() => setIsEmailFocused(true)}
+                  onBlur={() => setIsEmailFocused(false)}
+                />
+                <View
+                  style={[
+                    styles.passwordContainer,
+                    isPassFocused && styles.inputFocused,
+                  ]}>
+                  <TextInput
+                    style={styles.password}
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder="Пароль"
+                    placeholderTextColor="#BDBDBD"
+                    autoCapitalize="none"
+                    secureTextEntry={!isPasswordVisible}
+                    onFocus={() => setIsPassFocused(true)}
+                    onBlur={() => setIsPassFocused(false)}
+                  />
+                  <Pressable
+                    style={styles.button}
+                    onPress={togglePasswordVisibility}>
+                    <Text style={styles.buttonText}>
+                      {isPasswordVisible ? "Скрыть" : "Показати"}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+              <Pressable onPress={onRegistration} style={styles.submitButton}>
+                <Text style={styles.submitButtonText}>Зареєстуватися</Text>
               </Pressable>
+              <View style={styles.enterButton}>
+                <Text style={styles.enterButtonText}>Вже є акаунт?</Text>
+                <Pressable>
+                  <Text style={styles.regLink}>Увійти</Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
-          <Pressable onPress={onPressFunction} style={styles.submitButton}>
-            <Text style={styles.submitButtonText}>Зареєстуватися</Text>
-          </Pressable>
-          <Pressable onPress={onEnterFunction} style={styles.enterButton}>
-            <Text style={styles.enterButtonText}>Вже є акаунт? Увійти</Text>
-          </Pressable>
-        </View>
-        <Image style={styles.avatarBox} source={photo_block}></Image>
-      </ImageBackground>
-    </View>
+          </KeyboardAvoidingView>
+        </ImageBackground>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -67,27 +135,42 @@ const styles = StyleSheet.create({
   },
   image: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "flex-end",
+  },
+  keyboardContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
   },
   canva: {
     backgroundColor: "rgb(255, 255, 255)",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     width: "100%",
-    height: 549,
-    position: "absolute",
-    bottom: 0,
-    zIndex: 1,
     paddingLeft: 16,
     paddingRight: 16,
+    paddingBottom: 16,
+    paddingTop: 32,
   },
   avatarBox: {
     width: 132,
     height: 120,
     zIndex: 2,
     position: "absolute",
-    bottom: 489,
+    top: -60,
+    left: "50%",
+    transform: [{ translateX: -46 }],
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    backgroundColor: "#F6F6F6",
+    borderRadius: 16,
+  },
+  addPhoto: {
+    zIndex: 2,
+    position: "absolute",
+    bottom: 0,
+    right: 0,
   },
   title: {
     color: "#212121",
@@ -95,7 +178,6 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto",
     fontSize: 30,
     fontWeight: 500,
-    lineHeight: "normal",
     letterSpacing: 0.3,
     paddingTop: 92,
     paddingBottom: 33,
@@ -107,12 +189,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#F6F6F6",
     borderColor: "#E8E8E8",
     borderRadius: 8,
-    color: "#BDBDBD",
+    color: "#212121",
     fontSize: 16,
     marginBottom: 16,
   },
   inputGroup: {
     marginBottom: 27,
+  },
+  inputFocused: {
+    borderColor: "#FF6C00",
   },
   submitButton: {
     borderRadius: 100,
@@ -134,7 +219,7 @@ const styles = StyleSheet.create({
   },
   passwordContainer: {
     flexDirection: "row",
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#E0E0E0",
@@ -145,26 +230,23 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   password: {
-    color: '#BDBDBD',
-    fontFamily: 'Roboto',
+    color: "#212121",
     fontSize: 16,
-    fontStyle: 'normal',
-    fontWeight: 400,
-    lineHeight: 'normal'
+    width: 200,
   },
   enterButton: {
     margin: 16,
+    flexDirection: "row",
+    justifyContent: "center",
   },
   enterButtonText: {
-    color: '#1B4371',
-    textAlign: 'center',
-    fontFamily: 'Roboto',
+    color: "#1B4371",
     fontSize: 16,
-    
+  },
+  regLink: {
+    color: "#1B4371",
+    fontSize: 16,
   },
 });
-
-const onPressFunction = () => {};
-const onEnterFunction = () => {};
 
 export default RegistrationScreen;
